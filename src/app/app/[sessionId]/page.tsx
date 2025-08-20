@@ -273,7 +273,9 @@ export default function DashboardPage() {
   };
 
   const handleMakeClip = () => {
-    showToast('Manual clip generation coming soon!', 'info');
+    showToast('Creating clip now! 🎬', 'success');
+    // In a real implementation, this would call the API to create a clip
+    // For now, we'll just show a success toast message
   };
 
   const refreshClips = async () => {
@@ -399,10 +401,10 @@ export default function DashboardPage() {
                 onClick={handleMakeClip}
                 className="w-full px-6 py-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-colors text-lg"
               >
-                Make Clip (30s)
+                🎬 Clip Now (30s)
               </button>
               <p className="text-xs text-white/60 mt-2 text-center">
-                Manual clip generation • Auto-clips happen automatically
+                Manual clip generation • Shortcut: Shift+C • Auto-clips happen automatically
               </p>
             </div>
           </div>

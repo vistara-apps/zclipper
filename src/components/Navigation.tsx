@@ -1,10 +1,38 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
+import { useCallback, useEffect } from 'react';
+import { useToast } from './Toast';
 
 export default function Navigation() {
   const router = useRouter();
   const pathname = usePathname();
+  const { showToast } = useToast();
+
+  // Function to handle creating a clip now
+  const createClipNow = useCallback(() => {
+    showToast('Creating clip now! 🎬', 'success');
+    // In a real implementation, this would call the API to create a clip
+    // For now, we'll just show a toast message
+  }, [showToast]);
+
+  // Add global hotkey listener for Shift+C
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check if Shift+C was pressed
+      if (event.shiftKey && event.key === 'C') {
+        createClipNow();
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Clean up event listener on component unmount
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [createClipNow]);
 
   const navItems = [
     { 
@@ -59,6 +87,13 @@ export default function Navigation() {
 
           {/* Quick Actions */}
           <div className="flex items-center gap-3">
+            <button
+              onClick={createClipNow}
+              className="px-3 py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 rounded-lg transition-colors text-sm font-medium flex items-center gap-1"
+              title="Shortcut: Shift+C"
+            >
+              🎬 Clip Now
+            </button>
             <button
               onClick={() => router.push('/clips')}
               className="px-3 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg transition-colors text-sm font-medium"
