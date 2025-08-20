@@ -21,9 +21,13 @@ import uuid
 import websockets
 import subprocess
 import os
-from database import db
+from dotenv import load_dotenv
+from supabase_database import supabase_db
 from supabase_integration import supabase_manager
 from chaingpt_integration import chaingpt_enhancer
+
+# Load environment variables
+load_dotenv()
 
 # Setup paths and imports for viral engine
 import sys
@@ -66,15 +70,16 @@ async def get_current_user(authorization: str = Header(None)) -> str:
         demo_user_id = f"demo-user-{token.split('-')[-1]}"
         # Create demo user if doesn't exist
         try:
-            demo_user = db.get_user(demo_user_id)
+            demo_user = await supabase_db.get_user(demo_user_id)
             if not demo_user:
-                db.create_user(f"demo_user_{token.split('-')[-1]}", "demo@zclipper.ai")
-        except:
-            db.create_user(f"demo_user_{token.split('-')[-1]}", "demo@zclipper.ai")
+                await supabase_db.create_user(f"demo_user_{token.split('-')[-1]}", "demo@zclipper.ai")
+        except Exception as e:
+            logger.error(f"Error handling demo user: {e}")
+            await supabase_db.create_user(f"demo_user_{token.split('-')[-1]}", "demo@zclipper.ai")
         return demo_user_id
     
     # Regular auth
-    user_id = db.verify_token(token)
+    user_id = await supabase_db.verify_token(token)
     
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
@@ -427,7 +432,16 @@ class ViralSession:
                     self.viral_score = viral_energy
                     self.last_updated = datetime.now().isoformat()
                     
-                    # Update session data (WebSocket removed for Cloud Run compatibility)
+                    # Update session data in Supabase
+                    try:
+                        await supabase_db.update_session(
+                            self.session_id,
+                            chat_speed=velocity,
+                            viral_score=viral_energy,
+                            status=self.status
+                        )
+                    except Exception as e:
+                        logger.error(f"Error updating session in Supabase: {e}")
                     
                     # Log stats every 10 seconds to monitor activity
                     if int(current_time) % 10 == 0:
@@ -504,7 +518,7 @@ class ViralSession:
             if not thumbnail_path.exists():
                 generate_thumbnail(file_path, thumbnail_path)
             
-            # Save to local database with ChainGPT enhanced metadata
+            # Save to Supabase database with ChainGPT enhanced metadata
             clip_data_dict = {
                 'filename': file_path.name,
                 'duration': duration,
@@ -521,7 +535,13 @@ class ViralSession:
                 'distribution_strategy': enhanced_viral_data.get('distribution_strategy', {})
             }
             
-            stored_clip_id = db.create_clip(self.session_id, self.user_id, clip_data_dict)
+            try:
+                stored_clip_id = await supabase_db.create_clip(self.session_id, self.user_id, clip_data_dict)
+                if not stored_clip_id:
+                    logger.error("Failed to create clip record in Supabase")
+            except Exception as e:
+                logger.error(f"Error creating clip in Supabase: {e}")
+                stored_clip_id = None
             
             # Upload to Phyght platform (Supabase) with ChainGPT enhancement
             platform_data = {
@@ -553,12 +573,17 @@ class ViralSession:
             except Exception as e:
                 logger.error(f"Platform integration error: {e}")
             
-            # Update session in database
-            db.update_session(self.session_id, 
-                            clips_generated=self.clips_generated,
-                            revenue=self.revenue,
-                            chat_speed=self.chat_speed,
-                            viral_score=self.viral_score)
+            # Update session in Supabase database
+            try:
+                await supabase_db.update_session(
+                    self.session_id, 
+                    clips_generated=self.clips_generated,
+                    revenue=self.revenue,
+                    chat_speed=self.chat_speed,
+                    viral_score=self.viral_score
+                )
+            except Exception as e:
+                logger.error(f"Error updating session in Supabase: {e}")
             
             # Create clip object for broadcasting with ChainGPT enhancement
             clip_data = ClipData(
@@ -663,10 +688,23 @@ class ViralSession:
                 consecutive_failures += 1
                 await asyncio.sleep(10)  # Wait longer on error
     
-    def stop(self):
+    async def stop(self):
         """Stop the monitoring session"""
         self.running = False
         self.status = "stopped"
+        
+        # Update session status in Supabase
+        try:
+            await supabase_db.update_session(
+                self.session_id,
+                status="stopped",
+                chat_speed=self.chat_speed,
+                viral_score=self.viral_score,
+                clips_generated=self.clips_generated,
+                revenue=self.revenue
+            )
+        except Exception as e:
+            logger.error(f"Error updating session status in Supabase: {e}")
 
 # API Endpoints
 
@@ -680,10 +718,13 @@ async def health_check():
 async def register_user(request: CreateUserRequest):
     """Register a new user"""
     try:
-        user_id = db.create_user(request.username, request.email)
-        token = db.create_token(user_id)
+        user_id = await supabase_db.create_user(request.username, request.email)
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Failed to create user")
+            
+        token = await supabase_db.create_token(user_id)
         
-        user_data = db.get_user(user_id)
+        user_data = await supabase_db.get_user(user_id)
         
         return UserResponse(
             user_id=user_data['user_id'],
@@ -695,22 +736,25 @@ async def register_user(request: CreateUserRequest):
             token=token
         )
     except Exception as e:
+        logger.error(f"Registration error: {e}")
         raise HTTPException(status_code=400, detail=f"Registration failed: {str(e)}")
 
 @app.post("/api/auth/login", response_model=UserResponse)
 async def login_user(request: LoginRequest):
     """Login user (simplified - just by username for demo)"""
-    # In production, you'd verify password here
-    with db.db_path as conn:
-        cursor = conn.execute("SELECT user_id FROM users WHERE username = ?", (request.username,))
-        row = cursor.fetchone()
+    try:
+        # Query user by username
+        response = supabase_db.supabase.table('users').select('user_id').eq('username', request.username).execute()
         
-        if not row:
+        if not response.data or len(response.data) == 0:
             raise HTTPException(status_code=404, detail="User not found")
         
-        user_id = row[0]
-        token = db.create_token(user_id)
-        user_data = db.get_user(user_id)
+        user_id = response.data[0]['user_id']
+        token = await supabase_db.create_token(user_id)
+        user_data = await supabase_db.get_user(user_id)
+        
+        if not user_data:
+            raise HTTPException(status_code=404, detail="User data not found")
         
         return UserResponse(
             user_id=user_data['user_id'],
@@ -721,22 +765,31 @@ async def login_user(request: LoginRequest):
             total_revenue=user_data['total_revenue'],
             token=token
         )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
 
 @app.get("/api/auth/me", response_model=UserResponse)
 async def get_current_user_info(current_user: str = Depends(get_current_user)):
     """Get current user info"""
-    user_data = db.get_user(current_user)
-    if not user_data:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    return UserResponse(
-        user_id=user_data['user_id'],
-        username=user_data['username'],
-        email=user_data['email'],
-        plan=user_data['plan'],
-        clips_generated=user_data['clips_generated'],
-        total_revenue=user_data['total_revenue']
-    )
+    try:
+        user_data = await supabase_db.get_user(current_user)
+        if not user_data:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return UserResponse(
+            user_id=user_data['user_id'],
+            username=user_data['username'],
+            email=user_data['email'],
+            plan=user_data['plan'],
+            clips_generated=user_data['clips_generated'],
+            total_revenue=user_data['total_revenue']
+        )
+    except Exception as e:
+        logger.error(f"Get user info error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get user info: {str(e)}")
 
 @app.post("/api/start-monitoring", response_model=SessionResponse)
 async def start_monitoring(
@@ -748,17 +801,23 @@ async def start_monitoring(
     
     logger.info(f"Starting monitoring for channel: {request.channel} by user: {current_user}")
     
-    # Create session in database
-    session_id = db.create_session(current_user, request.channel)
-    
-    # Create in-memory session
-    session = ViralSession(session_id, request.channel, current_user)
-    active_sessions[session_id] = session
-    
-    # Start monitoring in background
-    background_tasks.add_task(session.start_monitoring)
-    
-    return SessionResponse(session_id=session_id)
+    try:
+        # Create session in database
+        session_id = await supabase_db.create_session(current_user, request.channel)
+        if not session_id:
+            raise HTTPException(status_code=500, detail="Failed to create session")
+        
+        # Create in-memory session
+        session = ViralSession(session_id, request.channel, current_user)
+        active_sessions[session_id] = session
+        
+        # Start monitoring in background
+        background_tasks.add_task(session.start_monitoring)
+        
+        return SessionResponse(session_id=session_id)
+    except Exception as e:
+        logger.error(f"Start monitoring error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to start monitoring: {str(e)}")
 
 @app.get("/api/status/{session_id}", response_model=SessionStatus)
 async def get_status(session_id: str):
@@ -772,22 +831,88 @@ async def get_status(session_id: str):
 @app.get("/api/clips/{session_id}")
 async def get_clips(session_id: str):
     """Get clips for a session"""
-    if session_id not in active_sessions:
-        raise HTTPException(status_code=404, detail="Session not found")
-    
-    session = active_sessions[session_id]
-    return {"clips": [clip.dict() for clip in session.clips]}
+    try:
+        # First check in-memory session
+        if session_id in active_sessions:
+            session = active_sessions[session_id]
+            in_memory_clips = [clip.dict() for clip in session.clips]
+            
+            # Also get clips from database for this session
+            db_clips = await supabase_db.get_session_clips(session_id)
+            
+            # Combine and deduplicate clips (prefer in-memory for duplicates)
+            all_clips = in_memory_clips.copy()
+            db_clip_ids = [clip.get('id') for clip in in_memory_clips]
+            
+            for db_clip in db_clips:
+                if db_clip.get('clip_id') not in db_clip_ids:
+                    # Transform to match in-memory format
+                    all_clips.append({
+                        'id': db_clip.get('clip_id'),
+                        'filename': db_clip.get('filename'),
+                        'created_at': db_clip.get('created_at'),
+                        'revenue': db_clip.get('revenue', 0),
+                        'size_mb': db_clip.get('size_mb', 0),
+                        'duration': db_clip.get('duration', 0),
+                        'viral_messages': db_clip.get('viral_messages', []),
+                        'chat_velocity': db_clip.get('chat_velocity', 0),
+                        'viral_score': db_clip.get('viral_score', 0),
+                        'has_overlay': bool(db_clip.get('thumbnail_url')),
+                        'overlay_type': 'standard'
+                    })
+            
+            return {"clips": all_clips}
+        else:
+            # Session not in memory, get from database
+            db_clips = await supabase_db.get_session_clips(session_id)
+            
+            if not db_clips:
+                raise HTTPException(status_code=404, detail="Session not found or has no clips")
+            
+            # Transform to match expected format
+            transformed_clips = [{
+                'id': clip.get('clip_id'),
+                'filename': clip.get('filename'),
+                'created_at': clip.get('created_at'),
+                'revenue': clip.get('revenue', 0),
+                'size_mb': clip.get('size_mb', 0),
+                'duration': clip.get('duration', 0),
+                'viral_messages': clip.get('viral_messages', []),
+                'chat_velocity': clip.get('chat_velocity', 0),
+                'viral_score': clip.get('viral_score', 0),
+                'has_overlay': bool(clip.get('thumbnail_url')),
+                'overlay_type': 'standard'
+            } for clip in db_clips]
+            
+            return {"clips": transformed_clips}
+    except Exception as e:
+        logger.error(f"Error getting clips: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get clips: {str(e)}")
 
 @app.post("/api/stop-monitoring/{session_id}")
 async def stop_monitoring(session_id: str):
     """Stop monitoring a session"""
-    if session_id not in active_sessions:
-        raise HTTPException(status_code=404, detail="Session not found")
-    
-    session = active_sessions[session_id]
-    session.stop()
-    
-    return {"message": "Monitoring stopped"}
+    try:
+        # First check if session is in memory
+        if session_id in active_sessions:
+            session = active_sessions[session_id]
+            await session.stop()
+            return {"message": "Monitoring stopped"}
+        else:
+            # Check if session exists in database
+            session_data = await supabase_db.get_session(session_id)
+            if not session_data:
+                raise HTTPException(status_code=404, detail="Session not found")
+            
+            # Update session status in database
+            await supabase_db.update_session(
+                session_id,
+                status="stopped"
+            )
+            return {"message": "Monitoring stopped (session was not active in memory)"}
+    except Exception as e:
+        logger.error(f"Error stopping monitoring: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to stop monitoring: {str(e)}")
 
 @app.post("/api/create-clip-now")
 async def create_clip_now(current_user: str = Depends(get_current_user)):
