@@ -7,7 +7,7 @@ import { useToast } from '@/components/Toast';
 import { API } from '@/lib/api';
 
 // Define clip duration presets
-const DURATION_PRESETS = [
+const DURATION_PRESETS: Array<{ label: string; value: number | 'custom' }> = [
   { label: '15s', value: 15 },
   { label: '30s', value: 30 },
   { label: '60s', value: 60 },
@@ -630,4 +630,3 @@ export default function CreateClipPage() {
     </div>
   );
 }
-
