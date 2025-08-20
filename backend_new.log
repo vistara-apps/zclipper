@@ -1,0 +1,13 @@
+INFO:__main__:Starting ZClipper Backend API Server
+INFO:     Started server process [94451]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:53331 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53530 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53576 - "GET /api/status/3bab6533-a3ca-4fef-b146-3da82f8c3a78 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53615 - "OPTIONS /api/start-monitoring HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53615 - "POST /api/start-monitoring HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:53786 - "POST /api/start-monitoring HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:53905 - "GET /api-clips HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53912 - "GET / HTTP/1.1" 404 Not Found

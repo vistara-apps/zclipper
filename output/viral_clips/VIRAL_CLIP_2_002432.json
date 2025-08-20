@@ -1,0 +1,24 @@
+{
+  "viral_id": 2,
+  "timestamp": "2025-08-18T00:24:31.829961",
+  "channel": "lacy",
+  "chat_velocity": 24,
+  "viral_energy": 21.0,
+  "sample_messages": [
+    "GO BACK TO SCHOOL",
+    "pecket?",
+    "W NOTICER",
+    "APPLIKATTER",
+    "mhm",
+    "GG",
+    "L READER",
+    "pecket",
+    "BLABBERING BLABBERING",
+    "PAQUET"
+  ],
+  "detection_time": "~3 seconds",
+  "video_file": "output/viral_clips/VIRAL_CLIP_2_002432.mp4",
+  "creation_time": "1.1s",
+  "format": "MP4_3sec_TikTok_ready",
+  "overlay": "\ud83d\udd25 VIRAL MOMENT - 24 MSG/SEC"
+}

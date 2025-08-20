@@ -1,0 +1,249 @@
+
+> zclipper@0.1.0 dev
+> next dev --turbopack
+
+ ⚠ Port 3000 is in use by process 4553
+7849, using available port 3001 instead.
+   ▲ Next.js 15.4.6 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://10.0.0.185:3001
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 843ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1258ms
+ GET / 200 in 1422ms
+ ✓ Compiled /favicon.ico in 92ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 346ms
+ ✓ Compiled /app in 151ms
+ GET /app 200 in 170ms
+ ✓ Compiled in 39ms
+ ✓ Compiled in 97ms
+ GET /app 200 in 136ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 224ms
+ GET /app 200 in 95ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 228ms
+ GET /app 200 in 65ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 240ms
+ ✓ Compiled in 33ms
+ GET /app 200 in 136ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 227ms
+ GET /app 200 in 107ms
+ ✓ Compiled /dashboard in 251ms
+ GET /dashboard 200 in 283ms
+ ✓ Compiled /app/[sessionId] in 173ms
+ GET /app/46b895c2-5a61-4524-9674-ba2cb7576459 200 in 507ms
+ GET /app/46b895c2-5a61-4524-9674-ba2cb7576459 200 in 49ms
+ GET / 200 in 40ms
+ GET /dashboard 200 in 54ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 226ms
+ ✓ Compiled /clips in 150ms
+ GET /clips 200 in 171ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 245ms
+ GET /app 200 in 48ms
+ GET /dashboard 200 in 38ms
+ GET /app/46b895c2-5a61-4524-9674-ba2cb7576459 200 in 40ms
+ GET /app/74717141-403f-4a64-bacd-9e7bcf08955b 200 in 2351ms
+ GET /app/46b895c2-5a61-4524-9674-ba2cb7576459 200 in 268ms
+ GET /app/74717141-403f-4a64-bacd-9e7bcf08955b 200 in 401ms
+ GET /app/46b895c2-5a61-4524-9674-ba2cb7576459 200 in 408ms
+ GET /app/74717141-403f-4a64-bacd-9e7bcf08955b 200 in 395ms
+ GET /app/74717141-403f-4a64-bacd-9e7bcf08955b 200 in 256ms
+ GET / 200 in 100ms
+ GET /app 200 in 51ms
+ GET /dashboard 200 in 113ms
+ GET / 200 in 73ms
+ GET /app 200 in 40ms
+ GET /dashboard 200 in 48ms
+ GET /app/7ed8cce6-3459-4c3c-b4b3-5e925e1cec11 200 in 59ms
+ GET /app/46b895c2-5a61-4524-9674-ba2cb7576459 200 in 38ms
+ GET /app/7ed8cce6-3459-4c3c-b4b3-5e925e1cec11 200 in 76ms
+ GET / 200 in 38ms
+ GET /app 200 in 39ms
+ GET /dashboard 200 in 37ms
+ GET /app/7ed8cce6-3459-4c3c-b4b3-5e925e1cec11 200 in 53ms
+ GET /clips 200 in 41ms
+ GET / 200 in 90ms
+ GET /app 200 in 35ms
+ GET / 200 in 66ms
+ GET / 200 in 79ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 224ms
+ GET /app 200 in 44ms
+ GET /dashboard 200 in 35ms
+ GET /app/5d2ed349-fb76-4dfa-ba61-e019dc2ee255 200 in 40ms
+ GET /app/ba78a557-eb07-4b74-9e82-391ffee75817 200 in 41ms
+ GET /clips 200 in 50ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 246ms
+ GET /app/7ed8cce6-3459-4c3c-b4b3-5e925e1cec11 200 in 37ms
+ GET /app/87c9647f-ee19-4b47-99c8-4e613d002705 200 in 64ms
+ GET /app/4ada5d31-7ce9-4c7d-80b4-1e3bb5998cf5 200 in 47ms
+ GET /app/ba78a557-eb07-4b74-9e82-391ffee75817 200 in 39ms
+ GET /clips 200 in 63ms
+ GET /dashboard 200 in 70ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 227ms
+ GET /app 200 in 45ms
+ ✓ Compiled in 51ms
+ GET /app 200 in 208ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 361ms
+ GET /dashboard 200 in 41ms
+ GET /app 200 in 35ms
+ GET /dashboard 200 in 49ms
+ ✓ Compiled in 54ms
+ GET /app/e2f922e6-e883-416b-946e-9665691f98c3 200 in 180ms
+ GET / 200 in 46ms
+ GET /app 200 in 130ms
+ GET /app 200 in 141ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 251ms
+ GET / 200 in 28ms
+ GET /app 200 in 36ms
+ GET /dashboard 200 in 47ms
+ GET /clips 200 in 38ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 325ms
+ GET /clips 200 in 74ms
+ ✓ Compiled in 83ms
+ ✓ Compiled in 42ms
+ GET /dashboard 200 in 158ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 222ms
+ GET /clips 200 in 40ms
+ GET / 200 in 200ms
+ GET /app 200 in 57ms
+ GET /dashboard 200 in 62ms
+ GET /clips 200 in 102ms
+ GET /clips 200 in 95ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 473ms
+ GET /clips 200 in 80ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 247ms
+ GET / 200 in 40ms
+ GET /app 200 in 44ms
+ GET /dashboard 200 in 44ms
+ GET /app 200 in 39ms
+ GET /dashboard 200 in 156ms
+ GET /dashboard 200 in 69ms
+ GET / 200 in 81ms
+ GET /app 200 in 43ms
+ GET /dashboard 200 in 40ms
+ GET / 200 in 42ms
+ GET /app 200 in 40ms
+ GET /dashboard 200 in 34ms
+ GET /clips 200 in 23ms
+ GET / 200 in 53ms
+ GET /app 200 in 22ms
+ GET /dashboard 200 in 83ms
+ GET / 200 in 48ms
+ GET /app 200 in 38ms
+ GET /dashboard 200 in 46ms
+ GET /app/b646d1af-01e2-4eb4-b992-931c5ccf1774 200 in 124ms
+ GET / 200 in 46ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 232ms
+ GET /app 200 in 34ms
+ GET /clips 200 in 62ms
+ GET /dashboard 200 in 37ms
+ GET /dashboard 200 in 58ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 221ms
+ GET /clips 200 in 35ms
+ GET / 200 in 41ms
+ GET /app 200 in 20ms
+ GET /dashboard 200 in 21ms
+ GET /app 200 in 34ms
+ GET /dashboard 200 in 20ms
+ GET /app/eedcedd3-b875-432f-adda-9e4dd76257ea 200 in 40ms
+ GET / 200 in 47ms
+ GET /app 200 in 40ms
+ GET /app 200 in 195ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 237ms
+ GET /dashboard 200 in 39ms
+ GET /clips 200 in 47ms
+ GET / 200 in 22ms
+ GET /app 200 in 26ms
+ GET /dashboard 200 in 37ms
+ GET /dashboard 200 in 82ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 226ms
+ GET /app 200 in 45ms
+ GET /dashboard 200 in 157ms
+ GET / 200 in 44ms
+ GET /app 200 in 59ms
+ GET /app 200 in 124ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 256ms
+ ✓ Compiled in 246ms
+ ✓ Compiled in 56ms
+ ✓ Compiled in 77ms
+ ✓ Compiled in 49ms
+ ✓ Compiled in 70ms
+ GET /app/7694c929-2a98-4d39-9849-4fb7b1660f33 200 in 45ms
+ GET / 200 in 44ms
+ GET /app 200 in 184ms
+ GET /dashboard 200 in 29ms
+ GET /app/c01f5ad7-f576-4488-84ef-d9ae7091f85e 200 in 37ms
+ GET /app 200 in 34ms
+ GET /dashboard 200 in 46ms
+ GET /app/3095d496-ca15-44f5-a1e2-58d44c865c9f 200 in 53ms
+ GET /app 200 in 33ms
+ GET /dashboard 200 in 41ms
+ GET /app/3095d496-ca15-44f5-a1e2-58d44c865c9f 200 in 29ms
+ GET /app/3095d496-ca15-44f5-a1e2-58d44c865c9f 200 in 113ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 220ms
+ GET /app 200 in 40ms
+ GET /clips 200 in 37ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 237ms
+ GET /app 200 in 33ms
+ GET /dashboard 200 in 33ms
+ GET /dashboard 200 in 53ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 222ms
+ GET /clips 200 in 36ms
+ GET /clips 200 in 39ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 220ms
+ GET / 200 in 38ms
+ GET /app 200 in 39ms
+ GET /dashboard 200 in 23ms
+ GET /app 200 in 38ms
+ GET /app/1df5e207-3850-497c-89e9-3aeafee7575e 200 in 58ms
+ GET /dashboard 200 in 40ms
+ GET /app 200 in 39ms
+ GET /dashboard 200 in 27ms
+ GET /app/1df5e207-3850-497c-89e9-3aeafee7575e 200 in 39ms
+ GET /app 200 in 35ms
+ GET /dashboard 200 in 38ms
+ GET / 200 in 62ms
+ GET /app 200 in 27ms
+ GET /dashboard 200 in 36ms
+ GET /clips 200 in 44ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 274ms
+ ✓ Compiled in 225ms
+ ✓ Compiled in 25ms
+ ✓ Compiled in 32ms
+ GET / 200 in 33ms
+ ✓ Compiled in 37ms
+ GET /app 200 in 51ms
+ GET /dashboard 200 in 153ms
+ ✓ Compiled in 39ms
+ ✓ Compiled in 258ms
+ ✓ Compiled in 68ms
+ ✓ Compiled in 48ms
+ ✓ Compiled in 17ms
+ GET /app/b9dcb969-a4ad-43e5-a01c-bf753f4de32a 200 in 192ms
+ GET /app 200 in 82ms
+ GET /clips 200 in 41ms
+ GET /app 200 in 40ms
+ GET /app/null 200 in 85ms
+ GET /app 200 in 40ms
+ GET /dashboard 200 in 115ms
+ GET /app/1df5e207-3850-497c-89e9-3aeafee7575e 200 in 59ms
+ ✓ Compiled in 79ms
+ ✓ Compiled in 46ms
+ ✓ Compiled in 26ms
+ GET / 200 in 48ms
+ GET /app 200 in 46ms
+ GET /clips 200 in 136ms
+ GET / 200 in 103ms
+ GET / 200 in 120ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 290ms
+ GET /app 200 in 268ms
+ GET /app 200 in 104ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 221ms
+ GET / 200 in 23ms
+ ✓ Compiled in 157ms
+ GET / 200 in 63ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 223ms
+ GET / 200 in 46ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 275ms

@@ -1,22 +1,26 @@
-FROM node:18-alpine
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-RUN npm ci --only=production
+# Copy requirements first for better caching
+COPY requirements_minimal.txt ./requirements.txt
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Create output directories
+RUN mkdir -p output/viral_clips output/thumbnails output/sessions
 
 # Expose port
-EXPOSE 3000
+EXPOSE 8080
 
 # Start the application
-CMD ["npm", "start"]
-EOF < /dev/null
+CMD ["python", "start.py"]
