@@ -10,10 +10,28 @@ export default function Navigation() {
   const { showToast } = useToast();
 
   // Function to handle creating a clip now
-  const createClipNow = useCallback(() => {
-    showToast('Creating clip now! 🎬', 'success');
-    // In a real implementation, this would call the API to create a clip
-    // For now, we'll just show a toast message
+  const createClipNow = useCallback(async () => {
+    try {
+      showToast('Creating clip now! 🎬', 'info');
+      
+      const response = await fetch('https://zclipper-api-62092339396.us-central1.run.app/api/create-clip-now', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer demo-token-${Date.now()}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        showToast(`✅ ${result.message}`, 'success');
+      } else {
+        const error = await response.json();
+        showToast(`❌ ${error.detail || 'Failed to create clip'}`, 'error');
+      }
+    } catch (error) {
+      showToast('❌ Network error creating clip', 'error');
+    }
   }, [showToast]);
 
   // Add global hotkey listener for Shift+C

@@ -141,7 +141,7 @@ class SimpleViralDetector:
         self.channel = channel_name.lower()
         self.websocket = None
         self.running = True
-        self.viral_threshold = 15
+        self.viral_threshold = 5
         self.energy_words = [
             'lmao', 'lmfao', 'omg', 'wtf', 'holy', 'insane', 'clip', 'viral', 
             'poggers', 'kekw', 'monkas', 'pepega', 'omegalul', 'ez clap',
@@ -210,6 +210,7 @@ class SimpleClipper:
         """Create 10-15 second viral clip with flying chat messages and viral overlays"""
         try:
             if not self.get_stream_url():
+                logger.error(f"Could not get stream URL for {self.channel}")
                 return None
             
             # Create output directory
@@ -428,7 +429,7 @@ class ViralSession:
                     await self.broadcast_update()
                     
                     # Check for viral moment (with cooldown)
-                    if velocity >= detector.viral_threshold or viral_energy >= 10:
+                    if velocity >= detector.viral_threshold or viral_energy >= 5:
                         await self.handle_viral_moment(clipper, velocity, viral_energy, recent_messages.copy())
                         # Cooldown period to prevent spam
                         await asyncio.sleep(30)

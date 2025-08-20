@@ -64,7 +64,7 @@ export default function AppPage() {
 
   // WebSocket connection for real-time updates
   const connectWebSocket = (sessionId: string) => {
-    const ws = new WebSocket(`ws://localhost:8000/ws/live-data/${sessionId}`);
+    const ws = new WebSocket(`wss://zclipper-api-62092339396.us-central1.run.app/ws/live-data/${sessionId}`);
     
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -182,7 +182,7 @@ export default function AppPage() {
       </header>
       
       <div className="max-w-7xl mx-auto p-6">
-        {/* Hero Section - HypeClip Style */}
+        {/* Hero Section - ZClipper Style */}
         <div className="text-center mb-16">
           <h1 className="text-6xl md:text-7xl font-black mb-6 leading-tight">
             Never miss a viral moment

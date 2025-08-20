@@ -335,7 +335,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/10 py-8 text-center text-white/60">
-        <p>&copy; 2024 HypeClip. Built for creators.</p>
+        <p>&copy; 2024 ZClipper AI. Built for creators.</p>
       </footer>
 
       {/* Video Modal */}

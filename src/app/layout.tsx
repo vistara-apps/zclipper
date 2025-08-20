@@ -7,19 +7,19 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'HypeClip — Never miss a viral moment',
+  title: 'ZClipper AI — Never miss a viral moment',
   description: 'Automatically detect and capture viral moments from your live streams in real-time. Turn engagement spikes into shareable clips.',
   keywords: 'streaming, clips, viral, twitch, youtube, content creation, live streaming',
-  authors: [{ name: 'HypeClip' }],
+  authors: [{ name: 'ZClipper AI' }],
   openGraph: {
-    title: 'HypeClip — Never miss a viral moment',
+    title: 'ZClipper AI — Never miss a viral moment',
     description: 'Automatically detect and capture viral moments from your live streams in real-time.',
     type: 'website',
-    url: 'https://hypeclip.com',
+    url: 'https://zclipper-a07p7z9nl-vistara.vercel.app',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'HypeClip — Never miss a viral moment',
+    title: 'ZClipper AI — Never miss a viral moment',
     description: 'Automatically detect and capture viral moments from your live streams in real-time.',
   },
 };

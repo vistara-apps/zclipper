@@ -258,7 +258,7 @@ export default function Dashboard() {
             </div>
             <div className="text-3xl font-bold text-white">
               {sessionsData?.sessions.length ? 
-                Math.round(sessionsData.sessions.reduce((acc, s) => acc + s.avg_viral_score, 0) / sessionsData.sessions.length) : 0}
+                Math.round(sessionsData.sessions.reduce((acc, s) => acc + (s.viral_score || 0), 0) / sessionsData.sessions.length) : 0}
             </div>
             <div className="text-sm text-blue-300">viral score</div>
           </div>
@@ -359,8 +359,8 @@ export default function Dashboard() {
                         <div className="text-white/60">msg/sec</div>
                       </div>
                       <div className="bg-orange-900/30 rounded px-2 py-1 text-center">
-                        <div className="font-bold">{Math.round(session.avg_viral_score)}</div>
-                        <div className="text-white/60">avg score</div>
+                        <div className="font-bold">{Math.round(session.viral_score || 0)}</div>
+                        <div className="text-white/60">viral score</div>
                       </div>
                     </div>
 
