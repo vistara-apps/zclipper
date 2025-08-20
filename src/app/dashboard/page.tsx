@@ -168,7 +168,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchSessionsRef.current();
-    const interval = setInterval(() => fetchSessionsRef.current(), 15000); // Reduced from 5s to 15s
+    const interval = setInterval(() => fetchSessionsRef.current(), 5000); // Poll every 5 seconds
     return () => clearInterval(interval);
   }, []);
 

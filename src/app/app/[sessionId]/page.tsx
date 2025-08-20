@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { getStatus, getClips, stopMonitoring, wsUrl, type SessionStatus, type Clip, type WSMessage, transformBackendClip, API } from '@/lib/api';
+import { getStatus, getClips, stopMonitoring, type SessionStatus, type Clip, API } from '@/lib/api';
 import { useToast } from '@/components/Toast';
 import PulseRing from '@/components/PulseRing';
 import Metrics from '@/components/Metrics';
@@ -24,12 +24,9 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedClip, setSelectedClip] = useState<Clip | null>(null);
   const [lastClipCount, setLastClipCount] = useState(0);
-  const [wsConnected, setWsConnected] = useState(false);
+  // WebSocket removed - using polling instead
   
-  const wsRef = useRef<WebSocket | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadClipsOnly = useCallback(async () => {
     if (!sessionId) return;
@@ -41,143 +38,48 @@ export default function DashboardPage() {
     }
   }, [sessionId]);
 
-  const handleWebSocketMessage = useCallback((message: WSMessage) => {
-    
-    switch (message.type) {
-      case 'session_update':
-        setStatus(prev => prev ? {
-          ...prev,
-          chat_speed: message.data.chat_speed ?? prev.chat_speed,
-          viral_score: message.data.viral_score ?? prev.viral_score,
-          clips_generated: message.data.clips_generated ?? prev.clips_generated,
-          revenue: message.data.revenue ?? prev.revenue,
-          last_updated: new Date().toISOString(),
-        } : null);
-        break;
-      
-      case 'clip_generated':
-        if (message.data.clip) {
-          const transformedClip = transformBackendClip(message.data.clip, sessionId as string);
-          setClips(prev => [transformedClip, ...ensureClipsArray(prev)]);
-          showToast('New clip generated! 🎬', 'success');
-        }
-        break;
-      
-      case 'error':
-        showToast(message.data.message || 'WebSocket error', 'error');
-        break;
-    }
-  }, [showToast, sessionId]);
+  // WebSocket message handling removed - using polling instead
 
   const cleanupConnections = useCallback(() => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.close();
-    }
-    wsRef.current = null;
-    
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
       pollingRef.current = null;
     }
-    
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-    
-    if (connectionTimeoutRef.current) {
-      clearTimeout(connectionTimeoutRef.current);
-      connectionTimeoutRef.current = null;
-    }
-    
-    setWsConnected(false);
   }, []);
 
-  const setupWebSocket = useCallback(async () => {
-    if (!sessionId || wsRef.current?.readyState === WebSocket.OPEN) {
-      return;
-    }
+  // Polling for session updates (WebSocket removed for Cloud Run compatibility)
+  const setupPollingUpdates = useCallback(() => {
+    if (!sessionId) return;
 
-    try {
-      // Check if backend is available before attempting WebSocket connection
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      
+    const pollData = async () => {
       try {
-        const healthResponse = await fetch(`${API}/health`, {
-          signal: controller.signal,
-          method: 'GET',
+        // Poll for status updates
+        const statusData = await getStatus(sessionId as string);
+        setStatus(prev => {
+          if (!prev) return statusData;
+          
+          // Check if clips count increased
+          if (statusData.clips_generated > prev.clips_generated) {
+            // New clips detected, refresh clips
+            loadClipsOnly();
+          }
+          
+          return statusData;
         });
-        clearTimeout(timeoutId);
-        
-        if (!healthResponse.ok) {
-          console.warn("Backend health check failed. Skipping WebSocket connection.");
-          return;
-        }
       } catch (error) {
-        clearTimeout(timeoutId);
-        console.warn("Backend health check failed. Skipping WebSocket connection:", error);
-        return;
+        console.error('Polling failed:', error);
       }
+    };
 
-      const ws = new WebSocket(wsUrl(sessionId as string));
-      
-      // Connection timeout
-      connectionTimeoutRef.current = setTimeout(() => {
-        if (ws.readyState === WebSocket.CONNECTING) {
-          console.warn("WebSocket connection timeout. Backend server may not be running.");
-          ws.close();
-        }
-      }, 5000);
-      
-      ws.onopen = () => {
-        console.log("WebSocket connected");
-        setWsConnected(true);
-        if (connectionTimeoutRef.current) {
-          clearTimeout(connectionTimeoutRef.current);
-          connectionTimeoutRef.current = null;
-        }
-      };
-      
-      ws.onmessage = (event) => {
-        try {
-          const message: WSMessage = JSON.parse(event.data);
-          handleWebSocketMessage(message);
-        } catch (error) {
-          console.error('Failed to parse WebSocket message:', error);
-        }
-      };
-      
-      ws.onerror = (error) => {
-        console.error("WebSocket connection failed. Please ensure the backend server is running at:", wsUrl(sessionId as string));
-        console.error("WebSocket error details:", error);
-        setWsConnected(false);
-      };
-      
-      ws.onclose = (event) => {
-        console.log('WebSocket disconnected', event.code, event.reason);
-        setWsConnected(false);
-        
-        if (connectionTimeoutRef.current) {
-          clearTimeout(connectionTimeoutRef.current);
-          connectionTimeoutRef.current = null;
-        }
-        
-        // Only attempt reconnection if the component is still mounted and we have a session
-        if (sessionId && !event.wasClean && event.code !== 1000) {
-          reconnectTimeoutRef.current = setTimeout(() => {
-            console.log('Attempting WebSocket reconnection...');
-            setupWebSocket();
-          }, 3000);
-        }
-      };
-      
-      wsRef.current = ws;
-    } catch (error) {
-      console.error('Failed to setup WebSocket:', error);
-      setWsConnected(false);
-    }
-  }, [sessionId, handleWebSocketMessage]);
+    // Initial poll
+    pollData();
+    
+    // Set up interval
+    const interval = setInterval(pollData, 3000); // Poll every 3 seconds for responsiveness
+    pollingRef.current = interval;
+    
+    return interval;
+  }, [sessionId, loadClipsOnly]);
 
   const loadData = useCallback(async () => {
     if (!sessionId) return;
@@ -202,54 +104,25 @@ export default function DashboardPage() {
     }
   }, [sessionId, showToast]);
 
-  const setupPolling = useCallback(() => {
-    // Clear any existing polling
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-      pollingRef.current = null;
-    }
-    
-    if (!sessionId) return;
-
-    console.log('Setting up polling for session:', sessionId);
-    
-    const interval = setInterval(async () => {
-      // Only poll if WebSocket is not connected and session is active
-      if (!wsConnected && status?.status === 'active') {
-        try {
-          const statusData = await getStatus(sessionId as string);
-          setStatus(statusData);
-        } catch (error) {
-          console.error('Polling failed:', error);
-        }
-      }
-    }, 30000); // Poll every 30 seconds (increased from 15 to reduce calls)
-    
-    pollingRef.current = interval;
-  }, [sessionId, wsConnected, status?.status]);
+  // Removed old polling function - using setupPollingUpdates instead
 
   useEffect(() => {
     if (!sessionId) return;
 
     loadData();
-    setupWebSocket();
-    setupPolling();
+    setupPollingUpdates();
 
     return cleanupConnections;
-  }, [sessionId, loadData, setupWebSocket, setupPolling, cleanupConnections]);
+  }, [sessionId, loadData, setupPollingUpdates, cleanupConnections]);
 
   useEffect(() => {
     if (status && status?.clips_generated > lastClipCount && lastClipCount > 0) {
       showViral();
-      // Only load clips if websocket didn't already update them
-      if (!wsConnected) {
-        loadClipsOnly();
-      }
     }
     if (status) {
       setLastClipCount(status?.clips_generated || 0);
     }
-  }, [status, lastClipCount, showViral, wsConnected, loadClipsOnly]);
+  }, [status, lastClipCount, showViral, loadClipsOnly]);
 
   const handlePreviewClip = (clip: Clip) => {
     setSelectedClip(clip);
@@ -272,10 +145,30 @@ export default function DashboardPage() {
     }
   };
 
-  const handleMakeClip = () => {
-    showToast('Creating clip now! 🎬', 'success');
-    // In a real implementation, this would call the API to create a clip
-    // For now, we'll just show a success toast message
+  const handleMakeClip = async () => {
+    try {
+      showToast('Creating clip now! 🎬', 'info');
+      
+      const response = await fetch(`${API}/api/create-clip-now`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer demo-token-${Date.now()}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        showToast(`✅ ${result.message}`, 'success');
+        // Refresh clips after creation
+        setTimeout(() => loadClipsOnly(), 2000);
+      } else {
+        const error = await response.json();
+        showToast(`❌ ${error.detail || 'Failed to create clip'}`, 'error');
+      }
+    } catch {
+      showToast('❌ Network error creating clip', 'error');
+    }
   };
 
   const refreshClips = async () => {
@@ -327,7 +220,7 @@ export default function DashboardPage() {
                 onClick={() => router.push('/')}
                 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
               >
-                HypeClip
+                ZClipper AI
               </button>
               <div className="text-white/60">•</div>
               <div>
@@ -337,16 +230,10 @@ export default function DashboardPage() {
             </div>
             
             <div className="flex items-center space-x-4">
-              {/* WebSocket Connection Status */}
-              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm ${
-                wsConnected 
-                  ? 'bg-green-900/30 text-green-400' 
-                  : 'bg-yellow-900/30 text-yellow-400'
-              }`}>
-                <div className={`w-2 h-2 rounded-full ${
-                  wsConnected ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'
-                }`}></div>
-                <span>{wsConnected ? 'Live' : 'Polling'}</span>
+              {/* Connection Status */}
+              <div className="flex items-center space-x-2 px-3 py-1 rounded-full text-sm bg-blue-900/30 text-blue-400">
+                <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+                <span>Live Polling</span>
               </div>
 
               {/* Session Status */}

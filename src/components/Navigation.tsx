@@ -29,7 +29,7 @@ export default function Navigation() {
         const error = await response.json();
         showToast(`❌ ${error.detail || 'Failed to create clip'}`, 'error');
       }
-    } catch (error) {
+    } catch {
       showToast('❌ Network error creating clip', 'error');
     }
   }, [showToast]);

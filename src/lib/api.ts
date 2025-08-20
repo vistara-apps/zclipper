@@ -1,4 +1,4 @@
-export const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
+export const API = process.env.NEXT_PUBLIC_API_BASE || 'https://zclipper-api-62092339396.us-central1.run.app';
 
 export interface Session {
   session_id: string;

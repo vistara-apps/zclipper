@@ -40,12 +40,7 @@ app = FastAPI(title="ZClipper API", version="1.0.0")
 # CORS setup for Next.js frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000", 
-        "http://localhost:3001",
-        "https://zclipper-cuobsr5ih-vistara.vercel.app",
-        "https://*.vercel.app"
-    ],
+    allow_origins=["*"],  # Allow all origins for now to fix CORS issue
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*", "Authorization", "Content-Type"],
@@ -57,7 +52,6 @@ logger = logging.getLogger(__name__)
 
 # Global storage for sessions
 active_sessions = {}
-websocket_connections = {}
 
 # Authentication helper
 async def get_current_user(authorization: str = Header(None)) -> str:
@@ -370,10 +364,14 @@ class ViralSession:
             clipper = SimpleClipper(self.channel)
             
             # Connect to chat
+            logger.info(f"Attempting to connect to Twitch chat for {self.channel}")
             connected = await detector.connect_chat()
             if not connected:
                 self.status = "error"
+                logger.error(f"Failed to connect to Twitch chat for {self.channel}")
                 raise Exception("Could not connect to Twitch chat")
+            
+            logger.info(f"Successfully connected to Twitch chat for {self.channel}")
             
             # Create stream thumbnail
             await self.create_stream_thumbnail(clipper)
@@ -412,6 +410,10 @@ class ViralSession:
                     msg_content = message.split("PRIVMSG")[1].split(":", 1)[-1].strip()
                     recent_messages.append(msg_content)
                     
+                    # Log first few messages to verify chat connection
+                    if message_count <= 3:
+                        logger.info(f"Chat message #{message_count} in {self.channel}: {msg_content}")
+                    
                     if len(recent_messages) > 30:
                         recent_messages.pop(0)
                 
@@ -425,11 +427,15 @@ class ViralSession:
                     self.viral_score = viral_energy
                     self.last_updated = datetime.now().isoformat()
                     
-                    # Broadcast to websocket clients
-                    await self.broadcast_update()
+                    # Update session data (WebSocket removed for Cloud Run compatibility)
+                    
+                    # Log stats every 10 seconds to monitor activity
+                    if int(current_time) % 10 == 0:
+                        logger.info(f"Channel {self.channel}: velocity={velocity} msg/sec, viral_energy={viral_energy}, threshold={detector.viral_threshold}")
                     
                     # Check for viral moment (with cooldown)
                     if velocity >= detector.viral_threshold or viral_energy >= 5:
+                        logger.info(f"🔥 VIRAL MOMENT DETECTED in {self.channel}! velocity={velocity}, energy={viral_energy}")
                         await self.handle_viral_moment(clipper, velocity, viral_energy, recent_messages.copy())
                         # Cooldown period to prevent spam
                         await asyncio.sleep(30)
@@ -571,45 +577,10 @@ class ViralSession:
             
             self.clips.append(clip_data)
             
-            # Broadcast clip generated event
-            await self.broadcast_clip_generated(clip_data)
+            # Clip stored in memory and database (WebSocket broadcasting removed)
     
-    async def broadcast_update(self):
-        """Broadcast session update to websocket clients"""
-        if self.session_id in websocket_connections:
-            message = {
-                "type": "session_update",
-                "data": {
-                    "session_id": self.session_id,
-                    "chat_speed": self.chat_speed,
-                    "viral_score": self.viral_score,
-                    "clips_generated": self.clips_generated,
-                    "revenue": self.revenue
-                }
-            }
-            
-            for websocket in websocket_connections[self.session_id].copy():
-                try:
-                    await websocket.send_text(json.dumps(message))
-                except:
-                    websocket_connections[self.session_id].remove(websocket)
-    
-    async def broadcast_clip_generated(self, clip_data):
-        """Broadcast clip generated event"""
-        if self.session_id in websocket_connections:
-            message = {
-                "type": "clip_generated",
-                "data": {
-                    "session_id": self.session_id,
-                    "clip": clip_data.model_dump()
-                }
-            }
-            
-            for websocket in websocket_connections[self.session_id].copy():
-                try:
-                    await websocket.send_text(json.dumps(message))
-                except:
-                    websocket_connections[self.session_id].remove(websocket)
+    # WebSocket broadcast methods removed for Cloud Run compatibility
+    # Using polling-based updates instead
     
     async def create_stream_thumbnail(self, clipper):
         """Create and continuously update stream thumbnail"""
@@ -1109,24 +1080,8 @@ async def download_clip(session_id: str, clip_id: str):
     
     raise HTTPException(status_code=404, detail="Clip file not found")
 
-@app.websocket("/ws/live-data/{session_id}")
-async def websocket_endpoint(websocket: WebSocket, session_id: str):
-    """WebSocket endpoint for live data updates"""
-    await websocket.accept()
-    
-    # Add to connections
-    if session_id not in websocket_connections:
-        websocket_connections[session_id] = []
-    websocket_connections[session_id].append(websocket)
-    
-    try:
-        while True:
-            # Keep connection alive
-            await asyncio.sleep(1)
-    except WebSocketDisconnect:
-        # Remove from connections
-        if session_id in websocket_connections:
-            websocket_connections[session_id].remove(websocket)
+# WebSocket removed - Cloud Run doesn't support WebSockets
+# Using polling-based updates instead
 
 if __name__ == "__main__":
     # Create output directories

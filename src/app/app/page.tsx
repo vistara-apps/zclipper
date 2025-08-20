@@ -62,25 +62,32 @@ export default function AppPage() {
     return [...baseHashtags, ...viralHashtags.slice(0, 2), ...gameHashtags.slice(0, 1)];
   };
 
-  // WebSocket connection for real-time updates
-  const connectWebSocket = (sessionId: string) => {
-    const ws = new WebSocket(`wss://zclipper-api-62092339396.us-central1.run.app/ws/live-data/${sessionId}`);
-    
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      
-      if (data.type === 'clip_generated') {
-        const clipWithAI = {
-          ...data.data.clip,
-          ai_title: generateAITitle(data.data.clip),
-          ai_hashtags: generateAIHashtags(data.data.clip),
-          virality_prediction: Math.min(95, Math.max(65, Math.round(data.data.clip.viral_score * 10 + Math.random() * 20)))
-        };
-        setClips(prev => [clipWithAI, ...prev]);
+  // Polling-based updates instead of WebSocket (Cloud Run doesn't support WS)
+  const startPolling = (sessionId: string) => {
+    const pollForUpdates = async () => {
+      try {
+        const response = await fetch(`https://zclipper-api-62092339396.us-central1.run.app/api/clips/${sessionId}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.clips && data.clips.length > clips.length) {
+            // New clips found, add them with AI enhancements
+            const newClips = data.clips.slice(clips.length).map((clip: ClipData) => ({
+              ...clip,
+              ai_title: generateAITitle(clip),
+              ai_hashtags: generateAIHashtags(clip),
+              virality_prediction: Math.min(95, Math.max(65, Math.round(clip.viral_score * 10 + Math.random() * 20)))
+            }));
+            setClips(prev => [...newClips, ...prev]);
+          }
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
       }
     };
-    
-    wsRef.current = ws;
+
+    // Poll every 5 seconds
+    const intervalId = setInterval(pollForUpdates, 5000);
+    return intervalId;
   };
 
   const handleStartMonitoring = async (e: React.FormEvent) => {
@@ -118,7 +125,11 @@ export default function AppPage() {
       setSessionId(result.session_id);
       localStorage.setItem('currentSessionId', result.session_id);
       showToast(progressSteps[0].message, 'info');
-      connectWebSocket(result.session_id);
+      
+      // Start polling for updates instead of WebSocket
+      const pollInterval = startPolling(result.session_id);
+      wsRef.current = { close: () => clearInterval(pollInterval) } as WebSocket;
+      
       setProgress(75);
       showToast(progressSteps[3].message, 'info');
       setCreatingClips(false);
