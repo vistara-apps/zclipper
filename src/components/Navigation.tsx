@@ -66,6 +66,12 @@ export default function Navigation() {
       description: 'View clips'
     },
     { 
+      name: 'Create Clip', 
+      path: '/create-clip', 
+      icon: '✂️',
+      description: 'Create custom clips'
+    },
+    { 
       name: 'Start', 
       path: '/app', 
       icon: '🚀',

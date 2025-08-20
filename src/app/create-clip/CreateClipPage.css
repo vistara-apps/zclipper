@@ -1,0 +1,197 @@
+/* CreateClipPage.css */
+
+.timeline-container {
+  position: relative;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.timeline-progress {
+  position: absolute;
+  height: 100%;
+  background-color: rgba(168, 85, 247, 0.5);
+  pointer-events: none;
+}
+
+.timeline-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background-color: rgb(168, 85, 247);
+  cursor: ew-resize;
+  z-index: 10;
+}
+
+.timeline-handle.start {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.timeline-handle.end {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.timeline-current {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: white;
+  z-index: 5;
+}
+
+.duration-preset {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.duration-preset.active {
+  background-color: rgb(168, 85, 247);
+  color: white;
+}
+
+.duration-preset:not(.active) {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.duration-preset:not(.active):hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.text-overlay-preview {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 8px 16px;
+  font-weight: bold;
+  font-size: 1.25rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.text-overlay-preview.top {
+  top: 16px;
+}
+
+.text-overlay-preview.center {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.text-overlay-preview.bottom {
+  bottom: 16px;
+}
+
+.effect-highlight {
+  position: absolute;
+  inset: 0;
+  border: 8px solid rgba(234, 179, 8, 0.5);
+  pointer-events: none;
+}
+
+.effect-blur {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+.effect-zoom {
+  position: absolute;
+  inset: 0;
+  transform: scale(1.1);
+  pointer-events: none;
+}
+
+.platform-button {
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.platform-button:not(.active) {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.platform-button:not(.active):hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.platform-button.twitter.active {
+  background: linear-gradient(to right, rgb(29, 161, 242), rgb(29, 141, 212));
+  color: white;
+}
+
+.platform-button.tiktok.active {
+  background: linear-gradient(to right, rgb(238, 29, 82), rgb(188, 29, 238));
+  color: white;
+}
+
+.platform-button.youtube.active {
+  background: linear-gradient(to right, rgb(255, 0, 0), rgb(200, 0, 0));
+  color: white;
+}
+
+.platform-button.instagram.active {
+  background: linear-gradient(to right, rgb(188, 42, 141), rgb(252, 175, 69));
+  color: white;
+}
+
+.action-button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.action-button.primary {
+  background: linear-gradient(to right, rgb(168, 85, 247), rgb(236, 72, 153));
+  color: white;
+}
+
+.action-button.primary:hover {
+  background: linear-gradient(to right, rgb(147, 51, 234), rgb(219, 39, 119));
+}
+
+.action-button.success {
+  background: linear-gradient(to right, rgb(22, 163, 74), rgb(5, 150, 105));
+  color: white;
+}
+
+.action-button.success:hover {
+  background: linear-gradient(to right, rgb(21, 128, 61), rgb(4, 120, 87));
+}
+
+.action-button.secondary {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.action-button.secondary:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
