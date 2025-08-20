@@ -42,7 +42,7 @@ A production-ready Next.js application that automatically detects and captures v
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone [https://github.com/vistara-apps/zclipper/](https://github.com/vistara-apps/zclipper/)
    cd zclipper
    ```
 
